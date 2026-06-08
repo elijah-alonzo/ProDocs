@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['avatar', 'first_name', 'middle_initial', 'last_name', 'email', 'contact_number', 'password', 'program_id'])]
+#[Fillable(['avatar', 'first_name', 'middle_initial', 'last_name', 'email', 'contact_number', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -38,19 +38,9 @@ class User extends Authenticatable
         return $this->full_name;
     }
 
-    public function loads(): HasMany
+    public function documents(): HasMany
     {
-        return $this->hasMany(Load::class);
-    }
-
-    public function program(): BelongsTo
-    {
-        return $this->belongsTo(Program::class);
-    }
-
-    public function submissions(): HasMany
-    {
-        return $this->hasMany(Submission::class, 'faculty_id');
+        return $this->hasMany(Document::class, 'submitted_by');
     }
 
     /**

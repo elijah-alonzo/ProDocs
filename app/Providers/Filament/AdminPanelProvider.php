@@ -4,9 +4,6 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Pages\Auth\Login;
 use App\Filament\Admin\Pages\Dashboard;
-use App\Filament\Admin\Widgets\AcademicContextWidget;
-use App\Filament\Admin\Widgets\AdminStatsWidget;
-use App\Filament\Admin\Widgets\MyAssignedGradingSheetsWidget;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -44,16 +41,12 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->navigationGroups([
-                'Grading Sheet Management',
+                'Document Management',
                 'User Management',
-                'Academic Management',
                 'System Settings',
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
-            ->widgets([
-                AcademicContextWidget::class,
-                AdminStatsWidget::class,
-            ])
+            ->widgets([])
             ->plugin(FilamentShieldPlugin::make()->navigationGroup('System Settings'))
             ->middleware([
                 EncryptCookies::class,

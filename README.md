@@ -1,12 +1,12 @@
-# Dynamic Document Approval Workflow Architecture
+# Dynamic Document Approval Workflow Platform Architecture
 
-## Vision
+## Overview
 
-Transform the current grading sheet approval system into a fully dynamic document workflow platform capable of supporting any document type and any approval process required by an institution.
+The Dynamic Document Approval Workflow Platform is designed to support any document approval process required by an institution without requiring code modifications. Rather than hardcoding document types, approval stages, or organizational roles, the system allows administrators to configure workflows entirely through the application interface.
 
-The system should not assume specific document types, approval stages, or roles. Instead, administrators should be able to configure document workflows through the application interface without requiring code changes.
+The platform serves as a generic workflow engine capable of managing approval processes for educational institutions, government agencies, private organizations, and other entities with document routing and approval requirements.
 
-Examples include:
+Examples of supported workflows include:
 
 ### Grading Sheet Workflow
 
@@ -24,15 +24,63 @@ Faculty Member → Program Coordinator Review → Dean Approval → Quality Assu
 
 Researcher → Department Chair Review → Ethics Committee Review → Research Director Approval → Approved
 
-The system should support unlimited workflow variations.
+The architecture supports unlimited workflow variations and approval stages.
 
 ---
 
-# Core Architecture
+# System Architecture
+
+## Technology Stack
+
+### Backend
+
+* Laravel
+* Filament Admin Panel
+* MySQL / PostgreSQL
+
+### Frontend
+
+* Filament Resources
+* Filament Widgets
+* Filament Actions
+* Custom Blade Views (only when necessary)
+
+### View Structure
+
+Custom views follow the project's established structure:
+
+```text
+resources/views/
+
+├── admin/
+│   ├── workflowdesigner/
+│   │   ├── page.blade.php
+│   │   └── styles.blade.php
+│   │
+│   ├── documenttimeline/
+│   │   ├── page.blade.php
+│   │   └── styles.blade.php
+│   │
+│   └── analytics/
+│       ├── page.blade.php
+│       └── styles.blade.php
+│
+├── app/
+│   └── ...
+│
+└── public/
+    └── shared components
+```
+
+Filament Resources should be used whenever possible. Custom Blade views are reserved for interfaces that require advanced visualizations, drag-and-drop interactions, workflow diagrams, or dashboards that cannot be effectively implemented using native Filament components.
+
+---
+
+# Core Modules
 
 ## Document Types
 
-Administrators can create document types through the system.
+Administrators can create and manage document categories through the system.
 
 Examples:
 
@@ -43,13 +91,33 @@ Examples:
 * Memorandum
 * Accreditation Document
 
-Each document type can be assigned its own workflow template.
+Each document type is associated with a workflow template that defines its approval process.
+
+### Resource
+
+```text
+DocumentTypeResource
+```
+
+### Database Table
+
+```text
+document_types
+
+- id
+- name
+- description
+- workflow_id
+- is_active
+- created_at
+- updated_at
+```
 
 ---
 
 ## Workflow Templates
 
-A workflow template defines the approval process for a document type.
+Workflow templates define the sequence of approval stages required for a document type.
 
 Example:
 
@@ -70,55 +138,67 @@ Step 3
 * Name: Dean Approval
 * Assigned Role: Dean
 
-When a document is submitted, it automatically follows these configured steps.
+When a document is submitted, the system automatically initializes the configured workflow.
+
+### Resource
+
+```text
+WorkflowResource
+```
+
+### Database Table
+
+```text
+workflows
+
+- id
+- name
+- description
+- created_at
+- updated_at
+```
 
 ---
 
 ## Workflow Steps
 
-Workflow steps should be stored in the database rather than configuration files.
+Workflow steps are stored in the database and generated dynamically at runtime.
 
-Suggested structure:
+Administrators can:
 
-### workflows
-
-* id
-* name
-* description
-
-### workflow_steps
-
-* id
-* workflow_id
-* step_order
-* step_name
-* assigned_role_id
-* action_label
-* approve_status
-* reject_status
-
-This allows administrators to:
-
-* Add new steps
+* Add steps
 * Remove steps
 * Reorder steps
-* Change approvers
-* Modify approval labels
+* Modify approvers
+* Configure labels
+* Configure statuses
 
-without changing code.
+No code changes are required.
+
+### Database Table
+
+```text
+workflow_steps
+
+- id
+- workflow_id
+- step_order
+- step_name
+- assigned_role_id
+- action_label
+- approve_status
+- reject_status
+- created_at
+- updated_at
+```
 
 ---
 
 ## Dynamic Roles
 
-Approval steps should not contain hardcoded role names.
+The platform must not rely on hardcoded organizational roles.
 
-Instead:
-
-### roles
-
-* id
-* name
+Instead, approval assignments are based on configurable role records.
 
 Examples:
 
@@ -132,62 +212,270 @@ Examples:
 
 Any role can be assigned to any workflow step.
 
-This allows different institutions to implement their own organizational structures.
+### Resource
+
+```text
+RoleResource
+```
+
+### Database Table
+
+```text
+roles
+
+- id
+- name
+- description
+- created_at
+- updated_at
+```
 
 ---
 
-## Workflow Execution Engine
+# Document Management
 
-The approval resource should dynamically determine:
+## Document Submission
 
-* Current workflow step
-* Assigned approver
-* Available actions
-* Next step
-* Rejection path
+Users submit documents through a generic document submission module.
 
-based on workflow configuration stored in the database.
+Each document contains:
 
-No document-specific logic should exist inside resources.
+* Document Type
+* Workflow Template
+* Uploaded File
+* Metadata
+* Current Workflow State
+
+### Resource
+
+```text
+DocumentResource
+```
+
+### Database Table
+
+```text
+documents
+
+- id
+- document_type_id
+- workflow_id
+- title
+- file_path
+- submitted_by
+- status
+- current_step_id
+- created_at
+- updated_at
+```
 
 ---
 
-## Single Document Approval Resource
+# Approval Engine
 
-The system should contain one generic resource:
+## Document Approval Resource
 
+The system contains a single approval resource responsible for handling all workflow approvals.
+
+### Resource
+
+```text
 DocumentApprovalResource
+```
 
-This resource will:
+Responsibilities:
 
 * Display pending approvals
 * Display approved documents
 * Display rejected documents
 * Display workflow history
 * Generate approval actions dynamically
+* Display current workflow status
 
-Tabs and actions should be generated from workflow definitions rather than hardcoded statuses.
+The resource should not contain document-specific logic.
+
+All behavior is determined by workflow configuration and the workflow engine.
 
 ---
 
-## Benefits
+# Workflow Execution Engine
 
-### Fully Configurable
+To ensure maintainability, workflow logic should not be implemented directly inside Filament Resources.
 
-New workflows can be created without development work.
+Instead, business rules should be delegated to service classes.
 
-### Institution Agnostic
+### Services
 
-Different institutions can implement completely different approval processes.
+```text
+app/Services/
 
-### Scalable
+├── WorkflowEngine.php
+├── WorkflowResolver.php
+├── ApprovalService.php
+└── DocumentStatusService.php
+```
 
-Supports unlimited document types and approval stages.
+---
 
-### Commercial Ready
+## WorkflowEngine Responsibilities
 
-The platform can be deployed to schools, universities, government offices, and private organizations without modifying source code.
+The Workflow Engine serves as the central orchestration layer.
 
-### Maintainable
+Functions include:
 
-Future document requirements can be implemented through configuration rather than creating new resources and duplicated logic.
+```text
+getCurrentStep()
+
+getAvailableActions()
+
+approve()
+
+reject()
+
+moveToNextStep()
+
+restartWorkflow()
+
+cancelWorkflow()
+```
+
+The engine determines:
+
+* Current workflow step
+* Assigned approvers
+* Available actions
+* Next approval stage
+* Rejection paths
+* Final completion status
+
+All decisions are generated dynamically from database configuration.
+
+---
+
+# Workflow History
+
+Every workflow action should be logged.
+
+### Database Table
+
+```text
+document_approvals
+
+- id
+- document_id
+- workflow_step_id
+- approved_by
+- status
+- remarks
+- acted_at
+```
+
+This provides a complete audit trail for every document.
+
+---
+
+# Custom View Usage
+
+Heres how I structure my applications
+
+The system should prioritize native Filament components.
+
+Custom views should only be created when advanced interfaces are required.
+
+```
+app/
+
+├── Features/
+│
+│   └── Workflow/
+│
+│       ├── Models/
+│       │   ├── Workflow.php
+│       │   └── WorkflowStep.php
+│       │
+│       ├── Actions/
+│       │   ├── CreateWorkflow.php
+│       │   ├── UpdateWorkflow.php
+│       │   └── DeleteWorkflow.php
+│       │
+│       ├── Services/
+│       │   └── WorkflowEngine.php
+│       │
+│       ├── Policies/
+│       │   └── WorkflowPolicy.php
+│       │
+│       ├── Livewire/
+│       │   └── WorkflowDesigner.php
+│       │
+│       ├── Views/
+│       │   └── workflowdesigner/
+│       │       ├── page.blade.php
+│       │       ├── styles.blade.php
+│       │       └── scripts.blade.php
+│       │
+│       ├── Tests/
+│       │   ├── Feature/
+│       │   └── Unit/
+│       │
+│       └── WorkflowServiceProvider.php
+│
+├── Filament/
+│
+│   └── Resources/
+│
+│       └── WorkflowResource/
+│           ├── WorkflowResource.php
+│           │
+│           ├── Pages/
+│           │   ├── ListWorkflows.php
+│           │   ├── CreateWorkflow.php
+│           │   └── EditWorkflow.php
+│           │
+│           ├── Schemas/
+│           │   └── WorkflowForm.php
+│           │
+│           ├── Tables/
+│           │   └── WorkflowTable.php
+│           │
+│           ├── Widgets/
+│           └── Relations/
+```
+
+# Benefits
+
+## Fully Configurable
+
+New workflows can be created entirely through the system interface without requiring software development.
+
+## Institution Agnostic
+
+Different organizations can implement their own approval structures regardless of hierarchy or process requirements.
+
+## Scalable
+
+Supports unlimited:
+
+* Document Types
+* Workflow Templates
+* Workflow Steps
+* Approval Roles
+
+## Commercial Ready
+
+The platform can be deployed across:
+
+* Universities
+* Colleges
+* Government Offices
+* Private Companies
+* Non-Profit Organizations
+
+without modifying application source code.
+
+## Maintainable
+
+Future workflow requirements can be implemented through configuration rather than creating additional resources or duplicating business logic.
+
+## Extensible
+
+Additional workflow features such as notifications, escalations, deadlines, digital signatures, and automated approvals can be integrated without redesigning the core architecture.

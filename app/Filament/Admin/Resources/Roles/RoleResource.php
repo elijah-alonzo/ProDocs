@@ -68,6 +68,10 @@ class RoleResource extends Resource
                                     ->required()
                                     ->maxLength(255),
 
+                                TextInput::make('description')
+                                    ->label('Description')
+                                    ->maxLength(255),
+
                                 Hidden::make('guard_name')
                                     ->default(Utils::getFilamentAuthGuard()),
 
@@ -108,6 +112,10 @@ class RoleResource extends Resource
                     ->label(__('filament-shield::filament-shield.column.name'))
                     ->formatStateUsing(fn (string $state): string => Str::headline($state))
                     ->searchable(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->searchable()
+                    ->limit(50),
                 TextColumn::make('team.name')
                     ->default('Global')
                     ->badge()

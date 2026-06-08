@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Filament\Admin\Resources;
+
+use App\Features\Workflow\Models\Workflow;
+use App\Filament\Admin\Resources\WorkflowResource\Pages\CreateWorkflow;
+use App\Filament\Admin\Resources\WorkflowResource\Pages\EditWorkflow;
+use App\Filament\Admin\Resources\WorkflowResource\Pages\ListWorkflows;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Placeholder;
+use Filament\Schemas\Components\Textarea;
+use Filament\Schemas\Components\TextInput;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use UnitEnum;
+
+class WorkflowResource extends Resource
+{
+    protected static ?string $model = Workflow::class;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
+
+    protected static UnitEnum|string|null $navigationGroup = 'System Settings';
+
+    protected static ?string $navigationLabel = 'Workflow Templates';
+
+    protected static ?int $navigationSort = 30;
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                Textarea::make('description')
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
+                Placeholder::make('designer')
+                    ->label('')
+                    ->visible(fn ($record) => $record !== null)
+                    ->content(fn ($record) => $record ? view('admin.workflowdesigner.holder', ['workflow' => $record]) : null)
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('description')
+                    ->limit(50),
+                TextColumn::make('steps_count')
+                    ->label('Stages')
+                    ->counts('steps')
+                    ->badge()
+                    ->color('info'),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([])
+            ->actions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListWorkflows::route('/'),
+            'create' => CreateWorkflow::route('/create'),
+            'edit' => EditWorkflow::route('/{record}/edit'),
+        ];
+    }
+}
