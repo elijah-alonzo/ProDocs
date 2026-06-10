@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Admin\Resources\DocumentTypeResource\Pages;
+namespace App\Filament\Admin\Resources\Data\Pages;
 
 use App\Filament\Admin\Resources\DocumentTypeResource;
 use Filament\Actions\DeleteAction;
