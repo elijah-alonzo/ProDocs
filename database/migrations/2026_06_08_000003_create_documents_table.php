@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('submitted_by')->constrained('users')->cascadeOnDelete();
             $table->string('status')->default('pending');
             $table->foreignId('current_step_id')->nullable()->constrained('workflow_steps')->nullOnDelete();
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }
