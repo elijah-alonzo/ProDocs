@@ -23,6 +23,8 @@ class Log extends Model
 {
     use Prunable;
 
+    protected $table = 'system_logs';
+
     public $timestamps = false;
 
     protected function casts(): array

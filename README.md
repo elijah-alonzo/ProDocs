@@ -502,13 +502,18 @@ Additional workflow features such as notifications, escalations, deadlines, digi
 >    - The Eloquent models (`Document`, `DocumentType`, `DocumentTypeField`, `Workflow`, `WorkflowStep`, `DocumentApproval`) are fully implemented and mapped.
 >    - The Spatie Roles schema contains a `description` column.
 > 3. **Current View State:**
->    - The custom blade files (like `admin.workflowdesigner.holder`, `admin.documenttimeline.holder`, `admin.documentapproval.preview`) do NOT exist yet in `resources/views`. They must be created.
+>    - The custom blade files are created under `app/Features/Workflows/Views/Admin/` and `app/Features/Approvals/Views/admin/document_approval/` and properly compiled.
+>    - Code view references in Filament resource classes and Livewire components are aligned to match these directory structures.
 > 4. **Testing Suite:**
 >    - Testing packages (`phpunit`, `pest`) are not configured in composer.json/composer.lock dev dependencies. Do not attempt to run test commands unless you install them first via composer or are asked to.
-> 5. **Core Objective for Phase 3 Implementation:**
->    - Modify `DocumentsResource.php` to make the `document_type_id` Select field reactive (`->live()`), load the `DocumentTypeField` fields dynamically, and persist them into the `metadata` JSON column.
->    - Update `ViewDocumentApproval.php` to display these metadata values as read-only.
->    - Create the missing placeholder/premium-styled Blade views to enable compilation and page loads.
+> 5. **Core Objective for Phase 3 Implementation (Complete):**
+>    - Modified `DocumentsResource.php` to make the `document_type_id` Select field reactive (`->live()`), load the `DocumentTypeField` fields dynamically, and persist them into the `metadata` JSON column.
+>    - Updated `ViewDocumentApproval.php` to display these metadata values as read-only.
+>    - Generated custom Filament themes (`app` and `admin`) and compiled Vite assets to enable page loads.
+> 6. **Filament Resources Consistency Objective:**
+>    - Update the Filament resources to be consistent:
+>      - The table action columns should use a grouped action dropdown (the one with the three dots).
+>      - When creating or editing a record in the resources, it should redirect back to the list view.
 
 File naming convention
 - directories: PascalCase
