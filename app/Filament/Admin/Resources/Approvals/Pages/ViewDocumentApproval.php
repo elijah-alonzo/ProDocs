@@ -84,9 +84,6 @@ class ViewDocumentApproval extends ViewRecord
                         'previewHtml' => $this->renderPreview($record),
                     ]),
 
-                View::make('Admin.DocumentTimeline.holder')
-                    ->columnSpan(1),
-
                 Section::make('Document Metadata')
                     ->schema(function (Document $record) {
                         $documentType = $record->documentType;

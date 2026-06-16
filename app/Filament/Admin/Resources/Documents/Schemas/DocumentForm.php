@@ -103,9 +103,6 @@ class DocumentForm
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
-                View::make('Admin.DocumentTimeline.holder')
-                    ->visible(fn ($record): bool => $record !== null)
-                    ->columnSpanFull(),
             ]);
     }
 }

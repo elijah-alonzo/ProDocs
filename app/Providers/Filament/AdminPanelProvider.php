@@ -63,8 +63,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->breadcrumbs(false)
-            ->font('Figtree')
-            ->brandLogo(asset('images/sys-logo.png'))
-            ->brandLogoHeight('4rem');
+            ->font('Figtree');
     }
 }

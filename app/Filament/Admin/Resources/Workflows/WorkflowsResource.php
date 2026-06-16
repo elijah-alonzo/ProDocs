@@ -48,9 +48,6 @@ class WorkflowsResource extends Resource
                             ->columnSpanFull(),
                     ])
                     ->columns(1),
-                View::make('Admin.WorkflowDesigner.holder')
-                    ->visible(fn ($record): bool => $record !== null)
-                    ->columnSpanFull(),
             ]);
     }
 
@@ -90,4 +87,11 @@ class WorkflowsResource extends Resource
             'edit' => EditWorkflow::route('/{record}/edit'),
         ];
     }
+
+public static function getRelations(): array
+{
+    return [
+        RelationManagers\WorkflowStepsRelationManager::class,
+    ];
+}
 }
