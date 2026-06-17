@@ -8,27 +8,16 @@ use App\Filament\Admin\Resources\Roles\Pages\CreateRole;
 use App\Filament\Admin\Resources\Roles\Pages\EditRole;
 use App\Filament\Admin\Resources\Roles\Pages\ListRoles;
 use App\Filament\Admin\Resources\Roles\Pages\ViewRole;
+use App\Filament\Admin\Resources\Roles\Schemas\RoleForm;
+use App\Filament\Admin\Resources\Roles\Tables\RolesTable;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
 use BezhanSalleh\PluginEssentials\Concerns\Resource as Essentials;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Panel;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Unique;
 use Override;
 use UnitEnum;
 
@@ -52,97 +41,13 @@ class RoleResource extends Resource
     #[Override]
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Grid::make()
-                    ->schema([
-                        Section::make('Role Details')
-                            ->description('Set a role name. Permissions are managed below.')
-                            ->schema([
-                                TextInput::make('name')
-                                    ->label(__('filament-shield::filament-shield.field.name'))
-                                    ->unique(
-                                        ignoreRecord: true, /** @phpstan-ignore-next-line */
-                                        modifyRuleUsing: fn (Unique $rule): Unique => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
-                                    )
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->prefixIcon('heroicon-o-fingerprint'),
-
-                                TextInput::make('description')
-                                    ->label('Description')
-                                    ->maxLength(255)
-                                    ->prefixIcon('heroicon-o-information-circle'),
-
-                                Hidden::make('guard_name')
-                                    ->default(Utils::getFilamentAuthGuard()),
-
-                                Select::make(config('permission.column_names.team_foreign_key'))
-                                    ->label(__('filament-shield::filament-shield.field.team'))
-                                    ->placeholder(__('filament-shield::filament-shield.field.team.placeholder'))
-                                    /** @phpstan-ignore-next-line */
-                                    ->default(Filament::getTenant()?->id)
-                                    ->options(fn (): array => in_array(Utils::getTenantModel(), [null, '', '0'], true) ? [] : Utils::getTenantModel()::pluck('name', 'id')->toArray())
-                                    ->visible(fn (): bool => static::shield()->isCentralApp() && Utils::isTenancyEnabled())
-                                    ->dehydrated(fn (): bool => static::shield()->isCentralApp() && Utils::isTenancyEnabled()),
-                                static::getSelectAllFormComponent(),
-
-                            ])
-                            ->columns([
-                                'sm' => 2,
-                                'lg' => 3,
-                            ])
-                            ->columnSpanFull(),
-                    ])
-                    ->columnSpanFull(),
-                Section::make('Permissions')
-                    ->description('Choose the areas this role can access.')
-                    ->schema([static::getShieldFormComponents()])
-                    ->columnSpanFull(),
-            ]);
+        return RoleForm::configure($schema, static::class);
     }
 
     #[Override]
     public static function table(Table $table): Table
     {
-        return $table
-            ->heading('Roles and Permissions')
-            ->description('Manage access by assigning permissions to roles.')
-            ->columns([
-                TextColumn::make('name')
-                    ->weight(FontWeight::Medium)
-                    ->label(__('filament-shield::filament-shield.column.name'))
-                    ->formatStateUsing(fn (string $state): string => Str::headline($state))
-                    ->searchable(),
-                TextColumn::make('description')
-                    ->label('Description')
-                    ->searchable()
-                    ->limit(50),
-                TextColumn::make('team.name')
-                    ->default('Global')
-                    ->badge()
-                    ->color(fn (mixed $state): string => str($state)->contains('Global') ? 'gray' : 'primary')
-                    ->label(__('filament-shield::filament-shield.column.team'))
-                    ->searchable()
-                    ->visible(fn (): bool => static::shield()->isCentralApp() && Utils::isTenancyEnabled()),
-                TextColumn::make('permissions_count')
-                    ->badge()
-                    ->label(__('filament-shield::filament-shield.column.permissions'))
-                    ->counts('permissions')
-                    ->color('warning'),
-                TextColumn::make('updated_at')
-                    ->label(__('filament-shield::filament-shield.column.updated_at'))
-                    ->dateTime(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                ActionGroup::make([
-                    EditAction::make(),
-                    DeleteAction::make(),
-                ]),
-            ]);
+        return RolesTable::configure($table, static::class);
     }
 
     #[Override]
