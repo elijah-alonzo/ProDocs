@@ -9,6 +9,8 @@ class CreateDocumentWorkflow extends CreateRecord
 {
     protected static string $resource = DocumentWorkflowResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     protected function getRedirectUrl(): string
     {
         return static::getResource()::getUrl('index');

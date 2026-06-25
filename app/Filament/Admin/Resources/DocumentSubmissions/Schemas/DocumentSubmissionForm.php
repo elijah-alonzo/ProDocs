@@ -37,13 +37,6 @@ class DocumentSubmissionForm
                                     }
                                 }
                             }),
-                        Select::make('document_workflow_id')
-                            ->label('Document Workflow')
-                            ->relationship('documentWorkflow', 'name')
-                            ->required()
-                            ->live()
-                            ->preload()
-                            ->prefixIcon('heroicon-o-arrow-path-rounded-square'),
                         Select::make('uploaders')
                             ->label('Assigned Uploaders')
                             ->relationship('uploaders', 'first_name')
@@ -52,13 +45,11 @@ class DocumentSubmissionForm
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->prefixIcon('heroicon-o-user-group')
-                            ->columnSpanFull(),
+                            ->prefixIcon('heroicon-o-user-group'),
                         FileUpload::make('file_path')
                             ->label('Document File')
                             ->disk('public')
-                            ->directory('documents')
-                            ->columnSpanFull(),
+                            ->directory('documents'),
                         Grid::make()
                             ->schema(function (callable $get) {
                                 $documentCategoryId = $get('document_category_id');
@@ -96,10 +87,8 @@ class DocumentSubmissionForm
 
                                 return $components;
                             })
-                            ->columns(1)
-                            ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columnSpanfull()
             ]);
     }
 }

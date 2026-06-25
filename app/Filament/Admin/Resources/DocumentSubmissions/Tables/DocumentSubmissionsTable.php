@@ -17,26 +17,15 @@ class DocumentSubmissionsTable
             ->heading('All Submissions')
             ->description('Track all document submissions and their current status.')
             ->columns([
-                TextColumn::make('display_name')
-                    ->label('Submission')
-                    ->getStateUsing(fn (DocumentSubmission $record): string => $record->display_name)
-                    ->searchable(query: function ($query, string $search): void {
-                        $query->whereHas('documentCategory', fn ($categoryQuery) => $categoryQuery->where('name', 'like', "%{$search}%"))
-                            ->orWhereHas('createdBy', fn ($creatorQuery) => $creatorQuery->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%"));
-                    })
-                    ->sortable(query: function ($query, string $direction): void {
-                        $query->orderBy('created_at', $direction);
-                    }),
                 TextColumn::make('documentCategory.name')
-                    ->label('Category')
+                    ->label('Document Category')
                     ->badge()
                     ->color('primary'),
                 TextColumn::make('createdBy.full_name')
-                    ->label('Created By')
+                    ->label('Creator')
                     ->sortable(),
                 TextColumn::make('uploaders.full_name')
-                    ->label('Assigned Uploaders')
+                    ->label('Uploader')
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->placeholder('Unassigned'),
@@ -54,8 +43,8 @@ class DocumentSubmissionsTable
                     ->badge()
                     ->color(fn ($state) => $state ? 'info' : 'success'),
                 TextColumn::make('created_at')
-                    ->label('Date Initiated')
-                    ->dateTime()
+                    ->label('Date Created')
+                    ->date()
                     ->sortable(),
             ])
             ->filters([])

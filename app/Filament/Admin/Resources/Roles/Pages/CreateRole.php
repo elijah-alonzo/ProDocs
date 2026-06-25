@@ -17,6 +17,8 @@ class CreateRole extends CreateRecord
 
     protected static string $resource = RoleResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     protected ?string $subheading = 'Create a new role and assign permissions.';
 
     protected function getRedirectUrl(): string

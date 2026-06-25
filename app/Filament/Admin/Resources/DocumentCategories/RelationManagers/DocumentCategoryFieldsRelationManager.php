@@ -24,71 +24,79 @@ class DocumentCategoryFieldsRelationManager extends BaseRelationManager
 {
     protected static string $relationship = 'fields';
 
-    protected static ?string $title = 'Submission Fields';
+    protected static bool $canCreateAnother = false;
 
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                Section::make('Field Settings')
-                    ->schema([
-                        TextInput::make('label')
-                            ->required()
-                            ->maxLength(255)
-                            ->prefixIcon('heroicon-o-tag')
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function (string $operation, ?string $state, callable $set): void {
-                                if ($operation !== 'create' || blank($state)) {
-                                    return;
-                                }
-                                $set('field_key', Str::snake(Str::ascii($state)));
-                            }),
+    protected static ?string $title = 'Document Category Fields';
 
-                        TextInput::make('field_key')
-                            ->label('Field Key')
-                            ->helperText('Stable identifier used in the metadata JSON. Lowercase, no spaces.')
-                            ->required()
-                            ->alphaDash()
-                            ->prefixIcon('heroicon-o-key')
-                            ->maxLength(255),
+public function form(Schema $schema): Schema
+{
+    return $schema
+        ->columns(2)
+        ->components([
+            TextInput::make('label')
+                ->label('Field Label')
+                ->placeholder('e.g. Research Title')
+                ->required()
+                ->maxLength(255)
+                ->prefixIcon('heroicon-o-tag')
+                ->live(onBlur: true)
+                ->afterStateUpdated(function (string $operation, ?string $state, callable $set): void {
+                    if ($operation !== 'create' || blank($state)) {
+                        return;
+                    }
 
-                        Select::make('type')
-                            ->options(DocumentCategoryField::TYPES)
-                            ->default('text')
-                            ->required()
-                            ->prefixIcon('heroicon-o-list-bullet')
-                            ->live(),
+                    $set('field_key', Str::snake(Str::ascii($state)));
+                })
+                ->columnSpanFull(),
 
-                        TextInput::make('help_text')
-                            ->label('Help Text')
-                            ->prefixIcon('heroicon-o-information-circle')
-                            ->maxLength(255),
+            TextInput::make('field_key')
+                ->label('Field Key')
+                ->placeholder('e.g. research_title')
+                ->helperText('Stable data identifier. Spaces and uppercase is prohibitted.')
+                ->required()
+                ->alphaDash()
+                ->prefixIcon('heroicon-o-key')
+                ->maxLength(255),
 
-                        KeyValue::make('options')
-                            ->label('Dropdown Choices')
-                            ->keyLabel('Value (stored)')
-                            ->valueLabel('Label (shown)')
-                            ->reorderable()
-                            ->visible(fn (callable $get): bool => $get('type') === 'select')
-                            ->columnSpanFull(),
+            Select::make('type')
+                ->label('Field Type')
+                ->options(DocumentCategoryField::TYPES)
+                ->default('text')
+                ->required()
+                ->prefixIcon('heroicon-o-list-bullet')
+                ->live(),
 
-                        Toggle::make('is_required')
-                            ->label('Required')
-                            ->default(false),
+            TextInput::make('help_text')
+                ->label('Help Text')
+                ->placeholder('Optional guidance shown to users')
+                ->prefixIcon('heroicon-o-information-circle')
+                ->maxLength(255)
+                ->columnSpanFull(),
 
-                        TextInput::make('sort_order')
-                            ->label('Sort Order')
-                            ->numeric()
-                            ->prefixIcon('heroicon-o-bars-3-bottom-left')
-                            ->default(0),
-                    ])
-                    ->columns(2),
-            ]);
-    }
+            KeyValue::make('options')
+                ->label('Dropdown Choices')
+                ->keyLabel('Value (stored)')
+                ->valueLabel('Label (shown)')
+                ->reorderable()
+                ->visible(fn (callable $get): bool => $get('type') === 'select')
+                ->columnSpanFull(),
+
+            TextInput::make('sort_order')
+                ->label('Sort Order')
+                ->numeric()
+                ->prefixIcon('heroicon-o-bars-3-bottom-left')
+                ->default(0),
+
+            Toggle::make('is_required')
+                ->label('Required')
+                ->default(false),
+        ]);
+}
 
     public function table(Table $table): Table
     {
         return $table
+            ->description('Configure the fields that users inputs when creating documents.')
             ->recordTitleAttribute('label')
             ->defaultSort('sort_order')
             ->reorderable('sort_order')
@@ -102,7 +110,9 @@ class DocumentCategoryFieldsRelationManager extends BaseRelationManager
                 IconColumn::make('is_required')->label('Required')->boolean(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->label('Add Field')
+                    ->createAnother(false),
             ])
             ->actions([
                 ActionGroup::make([

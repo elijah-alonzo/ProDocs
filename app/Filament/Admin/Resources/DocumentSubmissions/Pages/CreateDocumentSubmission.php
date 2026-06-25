@@ -12,6 +12,8 @@ class CreateDocumentSubmission extends CreateRecord
 {
     protected static string $resource = DocumentSubmissionResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     protected array $uploaderIds = [];
 
     protected function getRedirectUrl(): string

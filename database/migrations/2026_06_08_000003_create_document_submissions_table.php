@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('document_workflow_id')->constrained('document_workflows')->restrictOnDelete();
             $table->string('file_path')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->string('status')->default('pending');
+            $table->string('status')->default('Pending');
             $table->foreignId('current_step_id')->nullable()->constrained('document_workflow_steps')->nullOnDelete();
             $table->json('metadata')->nullable();
             $table->timestamps();

@@ -16,41 +16,43 @@ class DocumentWorkflowStepsRelationManager extends RelationManager
 {
     protected static string $relationship = 'steps';
 
-    protected static ?string $title = 'Document Workflow Stages';
+    protected static ?string $title = 'Document Process Stages';
 
     public function form(Schema $schema): Schema
     {
-        return $schema->components([
-            Forms\Components\TextInput::make('step_name')
-                ->label('Stage Name')
-                ->placeholder('e.g. Dean Approval')
-                ->required()
-                ->maxLength(255),
+        return $schema
+            ->columns(2)
+            ->components([
+                Forms\Components\TextInput::make('step_name')
+                    ->label('Stage Name')
+                    ->placeholder('e.g. Manager Approval')
+                    ->columnSpan(2)
+                    ->required()
+                    ->maxLength(255),
 
-            Forms\Components\Select::make('assigned_role_id')
-                ->label('Assigned Role')
-                ->options(Role::orderBy('name')->pluck('name', 'id'))
-                ->required()
-                ->searchable(),
+                Forms\Components\Select::make('assigned_role_id')
+                    ->label('Assigned Role')
+                    ->options(Role::orderBy('name')->pluck('name', 'id'))
+                    ->required()
+                    ->searchable(),
 
-            Forms\Components\TextInput::make('action_label')
-                ->label('Action Button Label')
-                ->placeholder('e.g. Approve / Endorse')
-                ->default('Approve')
-                ->required()
-                ->maxLength(255),
+                Forms\Components\TextInput::make('action_label')
+                    ->label('Action Button Label')
+                    ->placeholder('e.g. Approve, Endorse')
+                    ->required()
+                    ->maxLength(255),
 
-            Forms\Components\TextInput::make('approve_status')
-                ->label('Approved Status')
-                ->placeholder('e.g. approved / dean_signed')
-                ->required()
-                ->maxLength(255),
+                Forms\Components\TextInput::make('approve_status')
+                    ->label('Approved Status')
+                    ->placeholder('e.g. Approved by Manager')
+                    ->required()
+                    ->maxLength(255),
 
-            Forms\Components\TextInput::make('reject_status')
-                ->label('Rejected Status')
-                ->placeholder('e.g. rejected / dean_returned')
-                ->required()
-                ->maxLength(255),
+                Forms\Components\TextInput::make('reject_status')
+                    ->label('Rejected Status')
+                    ->placeholder('e.g. Rejected by Manager')
+                    ->required()
+                    ->maxLength(255),
         ]);
     }
 
@@ -59,6 +61,7 @@ class DocumentWorkflowStepsRelationManager extends RelationManager
         return $table
             ->reorderable('step_order')
             ->defaultSort('step_order')
+            ->description('Configure the steps for document process.')
             ->columns([
                 Tables\Columns\TextColumn::make('step_order')
                     ->label('#')
@@ -88,6 +91,7 @@ class DocumentWorkflowStepsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Add Stage')
+                    ->createAnother(false)
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['step_order'] = $this->getOwnerRecord()->steps()->count() + 1;
                         return $data;
