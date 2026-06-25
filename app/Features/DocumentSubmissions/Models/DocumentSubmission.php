@@ -9,6 +9,7 @@ use App\Features\Users\Models\User;
 use App\Features\Approvals\Models\DocumentApproval;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DocumentSubmission extends Model
@@ -18,9 +19,8 @@ class DocumentSubmission extends Model
     protected $fillable = [
         'document_category_id',
         'document_workflow_id',
-        'title',
         'file_path',
-        'submitted_by',
+        'created_by',
         'status',
         'current_step_id',
         'metadata',
@@ -40,9 +40,15 @@ class DocumentSubmission extends Model
         return $this->belongsTo(DocumentWorkflow::class, 'document_workflow_id');
     }
 
-    public function submittedBy(): BelongsTo
+    public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'submitted_by');
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function uploaders(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'document_submission_uploaders', 'document_submission_id', 'user_id')
+            ->withTimestamps();
     }
 
     public function currentStep(): BelongsTo
@@ -53,5 +59,14 @@ class DocumentSubmission extends Model
     public function approvals(): HasMany
     {
         return $this->hasMany(DocumentApproval::class, 'document_submission_id');
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        $category = $this->documentCategory?->name ?? 'Document';
+        $creator = $this->createdBy?->full_name ?? 'Unknown';
+        $date = $this->created_at?->format('M d, Y') ?? '';
+
+        return trim("{$category} — {$creator} ({$date})");
     }
 }

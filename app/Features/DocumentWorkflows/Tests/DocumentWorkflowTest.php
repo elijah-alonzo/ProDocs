@@ -39,6 +39,14 @@ class DocumentWorkflowTest extends TestCase
         ]);
         $deanUser->assignRole($roleDean);
 
+        $uploaderUser = User::create([
+            'first_name' => 'Uploader',
+            'last_name' => 'User',
+            'email' => 'uploader@test.com',
+            'password' => bcrypt('password'),
+        ]);
+        $uploaderUser->assignRole($roleStaff);
+
         // 3. Setup Workflow Template
         $workflow = DocumentWorkflow::create([
             'name' => 'Grading Workflow',
@@ -73,15 +81,18 @@ class DocumentWorkflowTest extends TestCase
         ]);
 
         // 5. Create Document Submission
+        // The submission instance is created by the staff user, who then
+        // assigns an uploader responsible for the actual file upload.
         $document = DocumentSubmission::create([
             'document_category_id' => $docCategory->id,
             'document_workflow_id' => $workflow->id,
-            'title' => 'First Semester Grades',
             'file_path' => 'documents/grades.pdf',
-            'submitted_by' => $staffUser->id,
+            'created_by' => $staffUser->id,
             'status' => 'pending',
             'current_step_id' => $step1->id,
         ]);
+
+        $document->uploaders()->sync([$uploaderUser->id]);
 
         /** @var DocumentWorkflowEngine $engine */
         $engine = app(DocumentWorkflowEngine::class);
@@ -116,5 +127,9 @@ class DocumentWorkflowTest extends TestCase
         $this->assertCount(2, $document->approvals);
         $this->assertEquals('Looks good, endorsing.', $document->approvals->first()->remarks);
         $this->assertEquals('Fully approved.', $document->approvals->last()->remarks);
+
+        // 11. Ownership and uploader assignment
+        $this->assertEquals($staffUser->id, $document->created_by);
+        $this->assertTrue($document->uploaders->contains($uploaderUser));
     }
 }

@@ -6,10 +6,13 @@ use App\Filament\Admin\Resources\DocumentSubmissions\DocumentSubmissionResource;
 use App\Features\DocumentCategories\Models\DocumentCategory;
 use App\Features\DocumentWorkflows\Models\DocumentWorkflowStep;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class CreateDocumentSubmission extends CreateRecord
 {
     protected static string $resource = DocumentSubmissionResource::class;
+
+    protected array $uploaderIds = [];
 
     protected function getRedirectUrl(): string
     {
@@ -18,10 +21,11 @@ class CreateDocumentSubmission extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        if (empty($data['submitted_by'])) {
-            $data['submitted_by'] = auth()->id();
-        }
+        $data['created_by'] = auth()->id();
         $data['status'] = 'pending';
+
+        $this->uploaderIds = (array) ($data['uploaders'] ?? []);
+        unset($data['uploaders']);
 
         if (empty($data['document_workflow_id'])) {
             $documentCategory = DocumentCategory::find($data['document_category_id']);
@@ -41,5 +45,16 @@ class CreateDocumentSubmission extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function handleRecordCreation(array $data): Model
+    {
+        $record = static::getModel()::create($data);
+
+        if (!empty($this->uploaderIds)) {
+            $record->uploaders()->sync($this->uploaderIds);
+        }
+
+        return $record;
     }
 }

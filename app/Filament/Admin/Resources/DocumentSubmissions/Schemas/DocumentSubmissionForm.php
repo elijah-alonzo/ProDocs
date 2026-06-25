@@ -21,12 +21,8 @@ class DocumentSubmissionForm
         return $schema
             ->components([
                 Section::make('New Document Submission')
-                    ->description('Initiate a document submission, select the workflow, and assign an uploader.')
+                    ->description('Initiate a document submission, select the workflow, and assign uploaders.')
                     ->schema([
-                        TextInput::make('title')
-                            ->required()
-                            ->maxLength(255)
-                            ->prefixIcon('heroicon-o-pencil-square'),
                         Select::make('document_category_id')
                             ->label('Document Category')
                             ->options(fn () => DocumentCategory::where('is_active', true)->pluck('name', 'id'))
@@ -48,14 +44,16 @@ class DocumentSubmissionForm
                             ->live()
                             ->preload()
                             ->prefixIcon('heroicon-o-arrow-path-rounded-square'),
-                        Select::make('submitted_by')
-                            ->label('Assigned Uploader')
-                            ->relationship('submittedBy')
+                        Select::make('uploaders')
+                            ->label('Assigned Uploaders')
+                            ->relationship('uploaders', 'first_name')
                             ->getOptionLabelFromRecordUsing(fn (User $record) => $record->full_name)
+                            ->multiple()
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->prefixIcon('heroicon-o-user'),
+                            ->prefixIcon('heroicon-o-user-group')
+                            ->columnSpanFull(),
                         FileUpload::make('file_path')
                             ->label('Document File')
                             ->disk('public')

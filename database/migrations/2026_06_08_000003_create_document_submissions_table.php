@@ -12,18 +12,27 @@ return new class extends Migration
             $table->id();
             $table->foreignId('document_category_id')->constrained('document_categories')->restrictOnDelete();
             $table->foreignId('document_workflow_id')->constrained('document_workflows')->restrictOnDelete();
-            $table->string('title');
             $table->string('file_path')->nullable();
-            $table->foreignId('submitted_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->string('status')->default('pending');
             $table->foreignId('current_step_id')->nullable()->constrained('document_workflow_steps')->nullOnDelete();
             $table->json('metadata')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('document_submission_uploaders', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('document_submission_id')->constrained('document_submissions')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['document_submission_id', 'user_id'], 'doc_submission_uploaders_unique');
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('document_submission_uploaders');
         Schema::dropIfExists('document_submissions');
     }
 };
