@@ -14,6 +14,8 @@ class DocumentCategoriesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->heading('Document Categories')
+            ->description('Documents that can be submitted and accepted by the system.')
             ->columns([
                 TextColumn::make('name')
                     ->searchable()

@@ -16,7 +16,7 @@ class DocumentWorkflowStepsRelationManager extends RelationManager
 {
     protected static string $relationship = 'steps';
 
-    protected static ?string $title = 'Document Process Stages';
+    protected static ?string $title = 'Document Workflow Stages';
 
     public function form(Schema $schema): Schema
     {

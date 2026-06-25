@@ -14,8 +14,8 @@ class DocumentSubmissionsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->heading('All Submissions')
-            ->description('Track all document submissions and their current status.')
+            ->heading('Document Submission Intances')
+            ->description('Overview of all document submission instances created.')
             ->columns([
                 TextColumn::make('documentCategory.name')
                     ->label('Document Category')

@@ -13,6 +13,8 @@ class DocumentWorkflowsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->heading('Document Processes')
+            ->description('Workflows that documents undergo for review and approval.')
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
