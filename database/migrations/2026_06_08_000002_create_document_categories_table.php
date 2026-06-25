@@ -14,6 +14,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('document_workflow_id')->nullable()->constrained('document_workflows')->nullOnDelete();
             $table->boolean('is_active')->default(true);
+            $table->json('allowed_creator_roles')->nullable();
+            $table->json('allowed_uploader_roles')->nullable();
             $table->timestamps();
         });
     }

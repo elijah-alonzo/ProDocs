@@ -18,10 +18,14 @@ class DocumentCategory extends Model
         'description',
         'document_workflow_id',
         'is_active',
+        'allowed_creator_roles',
+        'allowed_uploader_roles',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'allowed_creator_roles' => 'array',
+        'allowed_uploader_roles' => 'array',
     ];
 
     public function documentWorkflow(): BelongsTo
