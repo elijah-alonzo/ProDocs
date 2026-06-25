@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\DocumentCategories\Schemas;
 
+use App\Features\Roles\Models\Role;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -35,6 +36,36 @@ class DocumentCategoryForm
                             ->default(true)
                             ->required(),
                     ])
+                    ->columnSpanFull(),
+                Section::make('Access Control')
+                    ->description('Choose which roles can manage submission instances for this category, and which roles are allowed to submit documents.')
+                    ->schema([
+                        Select::make('allowed_creator_roles')
+                            ->label('Creator / Manager Roles')
+                            ->helperText('Users with these roles can create and manage submission instances for this category.')
+                            ->multiple()
+                            ->options(fn (): array => Role::query()
+                                ->where('name', '!=', 'Admin')
+                                ->orderBy('name')
+                                ->pluck('name', 'name')
+                                ->all())
+                            ->searchable()
+                            ->preload()
+                            ->prefixIcon('heroicon-o-user-group'),
+                        Select::make('allowed_uploader_roles')
+                            ->label('Uploader Roles')
+                            ->helperText('Users with these roles can be assigned to upload documents for submission instances.')
+                            ->multiple()
+                            ->options(fn (): array => Role::query()
+                                ->where('name', '!=', 'Admin')
+                                ->orderBy('name')
+                                ->pluck('name', 'name')
+                                ->all())
+                            ->searchable()
+                            ->preload()
+                            ->prefixIcon('heroicon-o-arrow-up-tray'),
+                    ])
+                    ->columns(2)
                     ->columnSpanFull(),
             ]);
     }
