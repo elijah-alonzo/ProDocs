@@ -2,8 +2,8 @@
 
 namespace App\Features\DocumentSubmissions\Models;
 
-use App\Features\DocumentWorkflows\Models\DocumentWorkflow;
-use App\Features\DocumentWorkflows\Models\DocumentWorkflowStep;
+use App\Features\DocumentProcesses\Models\DocumentProcess;
+use App\Features\DocumentProcesses\Models\DocumentProcessStage;
 use App\Features\DocumentCategories\Models\DocumentCategory;
 use App\Features\Users\Models\User;
 use App\Features\Approvals\Models\DocumentApproval;
@@ -18,11 +18,11 @@ class DocumentSubmission extends Model
 
     protected $fillable = [
         'document_category_id',
-        'document_workflow_id',
+        'document_process_id',
         'file_path',
         'created_by',
         'status',
-        'current_step_id',
+        'current_process_stage_id',
         'metadata',
     ];
 
@@ -35,9 +35,9 @@ class DocumentSubmission extends Model
         return $this->belongsTo(DocumentCategory::class, 'document_category_id');
     }
 
-    public function documentWorkflow(): BelongsTo
+    public function documentProcess(): BelongsTo
     {
-        return $this->belongsTo(DocumentWorkflow::class, 'document_workflow_id');
+        return $this->belongsTo(DocumentProcess::class, 'document_process_id');
     }
 
     public function createdBy(): BelongsTo
@@ -47,13 +47,17 @@ class DocumentSubmission extends Model
 
     public function uploaders(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'document_submission_uploaders', 'document_submission_id', 'user_id')
-            ->withTimestamps();
+        return $this->belongsToMany(
+            User::class,
+            'document_submission_uploaders',
+            'document_submission_id',
+            'user_id'
+        )->withTimestamps();
     }
 
-    public function currentStep(): BelongsTo
+    public function currentProcessStage(): BelongsTo
     {
-        return $this->belongsTo(DocumentWorkflowStep::class, 'current_step_id');
+        return $this->belongsTo(DocumentProcessStage::class, 'current_process_stage_id');
     }
 
     public function approvals(): HasMany
@@ -70,11 +74,6 @@ class DocumentSubmission extends Model
         return trim("{$category} — {$creator} ({$date})");
     }
 
-    /**
-     * Card title for the App panel dashboard: the value of the document
-     * category's first configured field (lowest sort_order), falling back
-     * to the category name when no value is set yet.
-     */
     public function getCardTitleAttribute(): string
     {
         $firstField = $this->documentCategory?->fields?->first();
@@ -90,18 +89,11 @@ class DocumentSubmission extends Model
         return $this->documentCategory?->name ?? 'Document Submission';
     }
 
-    /**
-     * The "document type" line shown on the card — the category name.
-     */
     public function getCardTypeAttribute(): string
     {
         return $this->documentCategory?->name ?? 'Document';
     }
 
-    /**
-     * Badge color for the status pill, matching the convention used in
-     * DocumentSubmissionsTable.
-     */
     public function getCardStatusColorAttribute(): string
     {
         return match ($this->status) {

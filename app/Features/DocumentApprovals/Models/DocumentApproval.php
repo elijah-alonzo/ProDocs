@@ -2,7 +2,7 @@
 
 namespace App\Features\Approvals\Models;
 
-use App\Features\DocumentWorkflows\Models\DocumentWorkflowStep;
+use App\Features\DocumentProcesses\Models\DocumentProcessStage;
 use App\Features\DocumentSubmissions\Models\DocumentSubmission;
 use App\Features\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +14,7 @@ class DocumentApproval extends Model
 
     protected $fillable = [
         'document_submission_id',
-        'document_workflow_step_id',
+        'document_process_stage_id',
         'approved_by',
         'status',
         'remarks',
@@ -30,9 +30,9 @@ class DocumentApproval extends Model
         return $this->belongsTo(DocumentSubmission::class, 'document_submission_id');
     }
 
-    public function documentWorkflowStep(): BelongsTo
+    public function documentProcessStage(): BelongsTo
     {
-        return $this->belongsTo(DocumentWorkflowStep::class, 'document_workflow_step_id');
+        return $this->belongsTo(DocumentProcessStage::class, 'document_process_stage_id');
     }
 
     public function user(): BelongsTo

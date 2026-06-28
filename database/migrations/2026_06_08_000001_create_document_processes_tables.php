@@ -15,11 +15,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('document_process_steps', function (Blueprint $table) {
+        Schema::create('document_process_stage', function (Blueprint $table) {
             $table->id();
             $table->foreignId('document_process_id')->constrained('document_processes')->cascadeOnDelete();
-            $table->integer('step_order');
-            $table->string('step_name');
+            $table->integer('stage_order');
+            $table->string('stage_name');
             $table->unsignedBigInteger('assigned_role_id');
             $table->string('action_label')->default('Approve');
             $table->string('approve_status');
@@ -32,7 +32,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('document_process_steps');
+        Schema::dropIfExists('document_process_stages');
         Schema::dropIfExists('document_processes');
     }
 };

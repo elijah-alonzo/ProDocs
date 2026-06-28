@@ -2,7 +2,7 @@
 
 namespace App\Features\DocumentCategories\Models;
 
-use App\Features\DocumentWorkflows\Models\DocumentWorkflow;
+use App\Features\DocumentProcesses\Models\DocumentProcess;
 use App\Features\DocumentSubmissions\Models\DocumentSubmission;
 use App\Features\DocumentCategoryFields\Models\DocumentCategoryField;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +16,7 @@ class DocumentCategory extends Model
     protected $fillable = [
         'name',
         'description',
-        'document_workflow_id',
+        'document_process_id',
         'is_active',
         'allowed_creator_roles',
         'allowed_uploader_roles',
@@ -28,9 +28,9 @@ class DocumentCategory extends Model
         'allowed_uploader_roles' => 'array',
     ];
 
-    public function documentWorkflow(): BelongsTo
+    public function documentProcess(): BelongsTo
     {
-        return $this->belongsTo(DocumentWorkflow::class, 'document_workflow_id');
+        return $this->belongsTo(DocumentProcess::class, 'document_process_id');
     }
 
     public function documentSubmissions(): HasMany

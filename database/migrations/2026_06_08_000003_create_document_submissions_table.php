@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('file_path')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
             $table->string('status')->default('Pending');
-            $table->foreignId('current_process_step_id')->nullable()->constrained('document_process_steps')->nullOnDelete();
+            $table->foreignId('current_process_stage_id')->nullable()->constrained('document_process_stages')->nullOnDelete();
             $table->json('metadata')->nullable();
             $table->timestamps();
         });
