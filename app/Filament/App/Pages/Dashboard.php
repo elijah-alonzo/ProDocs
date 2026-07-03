@@ -2,11 +2,11 @@
 
 namespace App\Filament\App\Pages;
 
-use App\Features\DocumentSubmissions\Models\DocumentSubmission;
+use App\Filament\App\Pages\Dashboard\Actions\DashboardActions;
+use App\Livewire\App\Dashboard\SubmissionsFeed;
 use Filament\Pages\Dashboard as BaseDashboard;
-use Filament\Schemas\Components\View;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Collection;
 
 class Dashboard extends BaseDashboard
 {
@@ -16,39 +16,20 @@ class Dashboard extends BaseDashboard
 
     public function getColumns(): int|array
     {
-        return [
-            'md' => 2,
-            'xl' => 2,
-        ];
+        return 1;
     }
 
     public function content(Schema $schema): Schema
     {
         return $schema
             ->components([
-                View::make('app.home.page')
-                    ->viewData(fn (): array => [
-                        'user' => auth()->user(),
-                        'submissions' => $this->getSubmissions(),
-                    ])
+                Livewire::make(SubmissionsFeed::class)
                     ->columnSpanFull(),
             ]);
     }
 
-    protected function getSubmissions(): Collection
+    public function getHeaderActions(): array
     {
-        $userId = auth()->id();
-
-        return DocumentSubmission::query()
-            ->where(function ($query) use ($userId) {
-                $query->where('created_by', $userId)
-                    ->orWhereHas('uploaders', fn ($uploaderQuery) => $uploaderQuery->where('user_id', $userId));
-            })
-            ->with([
-                'documentCategory.fields',
-                'currentProcessStage',
-            ])
-            ->orderByDesc('updated_at')
-            ->get();
+        return DashboardActions::configure();
     }
 }
