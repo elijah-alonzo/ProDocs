@@ -7,6 +7,11 @@ use Filament\Actions\Action;
 
 class DashboardActions
 {
+    /**
+     * Returns the header actions for the App panel Dashboard page.
+     * The "Create Submission" action is only visible to users whose role
+     * appears in at least one DocumentCategory's allowed_creator_roles.
+     */
     public static function configure(): array
     {
         return [
