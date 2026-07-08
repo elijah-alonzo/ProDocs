@@ -29,5 +29,6 @@ class AppServiceProvider extends ServiceProvider
 
         View::addLocation(app_path('Filament/App/Custom'));
         View::addLocation(app_path('Features/DocumentApprovals/Views'));
+        View::addLocation(app_path('Features/DocumentSubmissions/Views'));
     }
 }
