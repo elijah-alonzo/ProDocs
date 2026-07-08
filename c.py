@@ -12,8 +12,19 @@ def run(command):
 
 
 def main():
-    if len(sys.argv) > 1:
-        message = " ".join(sys.argv[1:])
+    args = sys.argv[1:]
+    push = False
+
+    if "-p" in args:
+        push = True
+        args.remove("-p")
+
+    if "--push" in args:
+        push = True
+        args.remove("--push")
+
+    if args:
+        message = " ".join(args)
     else:
         message = input("Commit message: ").strip()
 
@@ -22,9 +33,14 @@ def main():
 
     run("git add .")
     run(f'git commit -m "{message}"')
-    run("git push")
 
-    print("\n✓ Done!")
+    if push:
+        run("git push")
+
+    print("\n✓ Commit complete!")
+
+    if push:
+        print("✓ Changes pushed to remote.")
 
 
 if __name__ == "__main__":

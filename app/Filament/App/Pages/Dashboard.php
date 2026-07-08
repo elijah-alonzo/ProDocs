@@ -3,7 +3,7 @@
 namespace App\Filament\App\Pages;
 
 use App\Filament\App\Pages\Dashboard\Actions\DashboardActions;
-use App\Livewire\App\Dashboard\SubmissionsFeed;
+use App\Features\DocumentSubmissions\Livewire\SubmissionsFeed;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Schema;
