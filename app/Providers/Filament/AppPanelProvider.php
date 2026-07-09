@@ -7,6 +7,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use App\Filament\App\Pages\Dashboard;
+use App\Filament\App\Pages\SubmissionView;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -31,6 +32,7 @@ class AppPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\Filament\App\Pages')
             ->pages([
                 Dashboard::class,
+                SubmissionView::class,
             ])
             ->discoverWidgets(in: app_path('Filament/App/Widgets'), for: 'App\Filament\App\Widgets')
             ->widgets([
@@ -50,10 +52,10 @@ class AppPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->brandLogo(asset('app.png')) 
+            ->brandLogo(asset('app.png'))
             ->brandLogoHeight('2rem')
             ->colors([
-            'primary' => Color::hex('#2dbcc5'),
+                'primary' => Color::hex('#2dbcc5'),
             ]);
     }
 }

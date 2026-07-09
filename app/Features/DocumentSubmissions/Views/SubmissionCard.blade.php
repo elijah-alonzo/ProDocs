@@ -1,4 +1,4 @@
-<a href="{{ route('filament.app.pages.submission-view', ['record' => $submission->id]) }}"
+<a href="{{ \App\Filament\App\Pages\SubmissionView::getUrl(['record' => $submission->id]) }}"
    wire:navigate
    class="block w-full text-left">
     <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-primary-400 dark:hover:border-primary-500 transition-all duration-150 cursor-pointer">
