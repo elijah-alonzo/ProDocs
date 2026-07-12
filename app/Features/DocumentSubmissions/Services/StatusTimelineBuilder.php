@@ -7,29 +7,10 @@ use Illuminate\Support\Collection;
 
 class SubmissionTimelineBuilder
 {
-    /**
-     * Builds an ordered timeline of entries for a submission by merging
-     * the full stage pipeline with actual approval history. Each entry
-     * represents one (stage, cycle) pair with its state and any recorded
-     * approval data.
-     *
-     * Entry shape:
-     * [
-     *   'stage'    => DocumentProcessStage,
-     *   'cycle'    => int,
-     *   'state'    => 'approved' | 'rejected' | 'current' | 'pending',
-     *   'approval' => DocumentApproval|null,
-     * ]
-     *
-     * Multiple cycles for the same stage (restart after rejection) produce
-     * multiple entries in chronological order, preserving full history.
-     */
     public function build(DocumentSubmission $submission): Collection
     {
-        $stages = $submission->documentProcess->stages; // ordered by stage_order via relation
+        $stages = $submission->documentProcess->stages; 
 
-        // Sort approvals by acted_at ascending so earlier cycles come first,
-        // then group by cycle so we can replay each attempt in order.
         $approvalsByCycle = $submission->approvals
             ->sortBy('acted_at')
             ->groupBy('cycle');
@@ -37,10 +18,9 @@ class SubmissionTimelineBuilder
         $entries = collect();
         $currentCycle = $submission->current_cycle;
 
-        // Replay completed cycles first (any cycle before the current one).
         foreach ($approvalsByCycle as $cycle => $cycleApprovals) {
             if ((int) $cycle === $currentCycle) {
-                continue; // handled separately below
+                continue; 
             }
 
             $approvalsByStage = $cycleApprovals->keyBy('document_process_stage_id');
@@ -52,14 +32,13 @@ class SubmissionTimelineBuilder
                     $entries->push([
                         'stage'    => $stage,
                         'cycle'    => (int) $cycle,
-                        'state'    => $approval->status, // 'approved' | 'rejected'
+                        'state'    => $approval->status, 
                         'approval' => $approval,
                     ]);
                 }
             }
         }
 
-        // Now render the current cycle: past approvals + current + future stages.
         $currentCycleApprovals = $approvalsByCycle->get($currentCycle, collect());
         $approvalsByStage = $currentCycleApprovals->keyBy('document_process_stage_id');
 
