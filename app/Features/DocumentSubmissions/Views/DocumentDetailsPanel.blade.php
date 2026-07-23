@@ -28,9 +28,9 @@
         </div>
 
         {{-- Assigned Uploaders --}}
-        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+        <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 min-w-0">
             <x-heroicon-o-user-group class="w-4 h-4 shrink-0" />
-            <span>{{ $submission->card_uploader_label }}</span>
+            <span class="truncate">{{ $submission->card_uploader_label }}</span>
         </div>
 
         {{-- Metadata Fields --}}
@@ -70,27 +70,53 @@
                                    dark:file:bg-primary-500/10 dark:file:text-primary-400
                                    hover:file:bg-primary-100 dark:hover:file:bg-primary-500/20"
                         />
+
+                        {{-- Upload progress --}}
+                        <div wire:loading wire:target="file" class="mt-2 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                            <svg class="animate-spin h-3.5 w-3.5 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            Uploading...
+                        </div>
+
                         @error('file')
                             <p class="mt-1 text-xs text-danger-600 dark:text-danger-400">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <button
                         type="submit"
+                        wire:loading.attr="disabled"
+                        wire:loading.class="opacity-60 cursor-not-allowed"
                         class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
                     >
-                        <x-heroicon-o-arrow-up-tray class="w-4 h-4" />
-                        Upload
+                        <span wire:loading.remove wire:target="uploadFile">
+                            <x-heroicon-o-arrow-up-tray class="w-4 h-4 inline mr-1" />
+                            Upload
+                        </span>
+                        <span wire:loading wire:target="uploadFile" class="flex items-center gap-1.5">
+                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            Saving...
+                        </span>
                     </button>
                 </form>
             </div>
+
         @elseif ($submission->file_path)
             <div class="border-t border-gray-100 dark:border-gray-800 pt-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <x-heroicon-o-paper-clip class="w-4 h-4 shrink-0" />
                 <span>File uploaded</span>
                 @if (! $submission->canEditFile())
-                    <span class="text-xs text-gray-400 dark:text-gray-500">(locked — approval recorded)</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500 italic">
+                        (locked — approval recorded)
+                    </span>
                 @endif
             </div>
+
         @else
             <div class="border-t border-gray-100 dark:border-gray-800 pt-4 text-sm text-gray-400 dark:text-gray-500 italic">
                 No file uploaded yet.
@@ -103,7 +129,7 @@
     <livewire:status-timeline
         :submission="$submission"
         :timeline-entries="$timelineEntries"
-        :key="'timeline-'.$submission->id"
+        :key="'timeline-' . $submission->id"
     />
 
 </div>
