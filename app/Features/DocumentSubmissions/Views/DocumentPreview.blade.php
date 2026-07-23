@@ -19,34 +19,48 @@
     <div class="flex-1 flex items-center justify-center p-4">
 
         @if ($previewType === 'none')
-            {{-- No file uploaded yet --}}
             <div class="text-center space-y-3">
                 <x-heroicon-o-document class="w-16 h-16 text-gray-200 dark:text-gray-700 mx-auto" />
                 <p class="text-sm text-gray-400 dark:text-gray-500">No document uploaded yet.</p>
             </div>
 
         @elseif ($previewType === 'pdf')
-            {{-- PDF inline preview --}}
-            <iframe
-                src="{{ $fileUrl }}"
-                class="w-full h-full min-h-[540px] rounded-lg border border-gray-100 dark:border-gray-800"
-                title="Document Preview"
-            ></iframe>
+            {{-- Loading skeleton shown until iframe fires onload --}}
+            <div class="relative w-full min-h-[540px]">
+                <div
+                    id="pdf-skeleton"
+                    class="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg animate-pulse"
+                >
+                    <div class="text-center space-y-2">
+                        <x-heroicon-o-document class="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto" />
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Loading preview...</p>
+                    </div>
+                </div>
+                <iframe
+                    src="{{ $fileUrl }}"
+                    class="relative w-full min-h-[540px] rounded-lg border border-gray-100 dark:border-gray-800 opacity-0 transition-opacity duration-300"
+                    title="Document Preview"
+                    onload="
+                        this.style.opacity = '1';
+                        document.getElementById('pdf-skeleton').style.display = 'none';
+                    "
+                ></iframe>
+            </div>
 
         @elseif ($previewType === 'image')
-            {{-- Image preview --}}
             <img
                 src="{{ $fileUrl }}"
                 alt="Document Preview"
                 class="max-w-full max-h-[540px] rounded-lg object-contain border border-gray-100 dark:border-gray-800"
+                loading="lazy"
             />
 
         @else
-            {{-- Unsupported type — offer download --}}
             <div class="text-center space-y-4">
                 <x-heroicon-o-paper-clip class="w-16 h-16 text-gray-200 dark:text-gray-700 mx-auto" />
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Preview not available for <span class="font-medium uppercase">{{ $extension }}</span> files.
+                    Preview not available for
+                    <span class="font-medium uppercase">{{ $extension }}</span> files.
                 </p>
                 <a href="{{ $fileUrl }}"
                    download
